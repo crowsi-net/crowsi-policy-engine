@@ -1,0 +1,31 @@
+[package]
+exclude = ["/registration/**", "/state/**", "/.local/**", "/.state/**", "/.data/**", "/secrets/**", "/credentials/**", "/.env", "/.env.production", "/.env.local", "/*.tgz", "/*.tar.gz", "/*.tar", "/*.zip", "/*.whl", "/*.crate", "/.ruff_cache/**", "/.mypy_cache/**", "/.tox/**", "/.nox/**", "/.hypothesis/**", "/.coverage", "/.coverage.*", "/htmlcov/**", "/lcov.info", "/junit.xml", "/*.profraw", "/*.profdata", "/*.egg-info/**", "/target/**", "/node_modules/**", "/dist/**", "/build/**", "/.cache/**", "/.pytest_cache/**", "/coverage/**"]
+name = "crowsi-policy-engine"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97"
+description = "Pure deterministic Zero Trust policy evaluation for Crowsi"
+license = "Apache-2.0"
+readme = "README.md"
+publish = ["ecosystem-private"]
+repository = "https://github.com/crowsi-net/crowsi-policy-engine"
+
+[package.metadata.crowsi]
+external-actions = false
+cryptographic-verification = "not-shipped"
+policy-administration = "not-shipped"
+
+[workspace]
+members = ["."]
+resolver = "3"
+
+[dependencies]
+crowsi-control-contracts = { version = "=0.1.0", registry = "ecosystem-private" }
+sha2 = "0.10.9"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
