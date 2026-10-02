@@ -1,88 +1,30 @@
 # crowsi-policy-engine
 
-`crowsi-policy-engine` is the pure Policy Engine for the Crowsi Zero Trust
-control path. It deterministically evaluates an already signature-verified
-`VerifiedIdentityContextV1`, `SecurityIntentV1`, and caller-supplied PIP state.
-It returns an unsigned `PolicyEvaluation` containing `Permit` or `Deny`, one
-stable reason, the required assurance, policy digest, and obligations.
+Decide whether a verified operation request satisfies an explicit policy.
 
-## Trust boundary
+## What you can do
 
-The caller supplies:
+- Evaluate identity, intent and supplied policy information.
+- Return a reproducible allow or deny result.
 
-- identity and intent whose detached signatures and canonical payloads were
-  verified against an allowlisted trust anchor;
-- the current revocation epoch;
-- fresh device and workload posture bound to the exact identity targets;
-- an independent `CoverageAssertionV1`;
-- incident state bound to the exact resource, a reviewed policy digest, trusted
-  time, an exact context/grant/epoch/audience/resource/action/purpose
-  management authority, and bounded risk score.
+## Current scope
 
-The engine repeats closed-contract validation but does not verify signatures.
-It does not read a clock; `now` is explicit input so equal inputs always produce
-equal output. The versioned policy digest is recomputed over the risk
-restrictions so a reviewed digest cannot be paired with different thresholds.
-Posture, incident, and management-authority evidence must be active at `now`
-and use a trust window no longer than five minutes.
+The engine consumes verified inputs and returns a decision. It does not perform the requested operation.
 
-## Fixed evaluation order
+Package distribution is not activated by this documentation. Use the checked-in source and the declared dependency versions; published availability must be verified separately.
 
-1. malformed contracts, time, or policy;
-2. unknown posture, coverage, or incident state;
-3. expired identity, intent, posture, or coverage;
-4. revocation-epoch mismatch;
-5. identity, posture target, incident resource, management authority, audience,
-   or resource mismatch;
-6. untrusted device or workload;
-7. insufficient coverage;
-8. restore without `RecoveryAuthorized`;
-9. insufficient assurance;
-10. risk restrictions.
+## Getting started
 
-Risk may require hardware-bound step-up or deny above the policy maximum. It is
-never evaluated as an allow reason and cannot reverse any earlier denial.
+Install Rust 1.97 or newer and make the declared dependencies available. Use the configured private registry when a dependency is not distributed publicly. Run from this repository:
 
-## Containment and restore
-
-Restore requires complete, fresh, managed, independently verified, healthy
-coverage, `RecoveryAuthorized`, and hardware-bound step-up assurance.
-
-Quarantine and access revocation may proceed with fresh partial coverage only
-when the caller proves management authority and the fresh signed coverage
-assertion reports a verified management lifeline plus a ready requested
-capability. The permit is marked `DegradedContainment` and obligates downstream
-components not to claim complete isolation. Unknown, stale, unmanaged, or
-expired coverage is never accepted by this exception.
-
-`ActionCoverageV1` does not currently expose an exact `RestrictEgress`
-capability. This engine therefore denies that action as unknown rather than
-silently treating quarantine capability as equivalent.
-
-## Non-capabilities
-
-This crate performs no I/O, signature verification, credential access, policy
-administration, grant minting, audit persistence, network operation, or
-provider mutation. A separate PA may map an allowed evaluation into a signed
-`PolicyDecisionV1`; a resource-local PEP remains responsible for enforcement,
-replay prevention, receipts, and independent verification.
-
-The unsigned result echoes the identity context, intent JTI, revocation epoch,
-action binding, coverage assertion, incident, and evaluation time. A PA must
-reject any attempt to pair the result with different inputs.
-
-## Offline verification
-
-```bash
-# WONDERLAND_ROOT is the workspace checkout root.
-"$WONDERLAND_ROOT/bin/verify-repositories" --rust --tier standard
+```sh
+cargo test --locked
 ```
 
-From the Wonderland root, also run:
+## Documentation and source
 
-```bash
-node tools/check-source-layout.mjs .
-```
+[Interface reference](docs/interface-reference.md)
 
-Passing tests proves these deterministic rules, not complete intrusion
-detection, successful containment, or production Zero Trust conformance.
+[Usage guide](docs/getting-started.md)
+
+[Implementation and public interfaces](src) · [Verification cases](tests) · [Contributing](CONTRIBUTING.md) · [Security reporting](SECURITY.md) · [License](LICENSE) · [Attribution notices](NOTICE)
